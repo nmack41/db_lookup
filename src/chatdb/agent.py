@@ -1,5 +1,6 @@
-from typing import Any
 from dataclasses import dataclass
+from typing import Any
+
 from pydantic import BaseModel
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models import KnownModelName
@@ -13,9 +14,9 @@ class AgentDeps:
     database: Database
 
 
-def get_agent(model_name: KnownModelName, api_key: str, database: Database) -> Agent:
+def get_agent(model_name: KnownModelName, api_key: str, database: Database) -> Agent[AgentDeps, str]:
     model = build_model_from_name_and_api_key(model_name, api_key)
-    
+
     agent = Agent(model=model, deps_type=AgentDeps, system_prompt=get_system_prompt(database), tools=[execute_sql])
     return agent
 

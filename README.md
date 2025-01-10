@@ -5,6 +5,7 @@ Use AI to query your database using natural language. ChatDB provides a CLI and 
 ## Features
 
 - Natural language to SQL translation
+- Support all major databases (PostgreSQL, MySQL, Oracle, MSSQL, SQLite)
 - Support for multiple AI providers:
   - OpenAI (GPT-4, GPT-3.5)
   - Anthropic (Claude)
@@ -19,13 +20,16 @@ Use AI to query your database using natural language. ChatDB provides a CLI and 
 
 ## Installation
 
-Clone the repository and install the package:
+Install directly from GitHub, specifying the database drivers you need:
 
 ```
-git clone https://github.com/yourusername/chatdb.git
-cd chatdb
-make install
+# Install with all database drivers
+pip install git+https://github.com/Finndersen/chatdb.git[all]
+
+# Install with specific database drivers (choose one or more)
+pip install git+https://github.com/Finndersen/chatdb.git[postgres, mysql, oracle, mssql]
 ```
+
 
 ## Usage
 
@@ -35,9 +39,18 @@ Run the CLI with your model choice and API key:
 
 ```
 # Using OpenAI
-python -m chatdb.cli --model-name openai:gpt-4 --api-key your_api_key --db-uri postgresql://user:pass@localhost:5432/dbname
+python -m chatdb.cli --model-name provider:model_name --api-key your_api_key --db-uri postgresql://user:pass@localhost:5432/dbname
 
 ```
+
+Supported databases and their connection strings:
+- PostgreSQL: `postgresql://user:pass@localhost:5432/dbname`
+- MySQL: `mysql+pymysql://user:pass@localhost:3306/dbname`
+- Oracle: `oracle+cx_oracle://user:pass@localhost:1521/dbname`
+- MSSQL: `mssql+pyodbc://user:pass@localhost/dbname`
+- SQLite: `sqlite:///path/to/db.sqlite3`
+
+Use `--help` to see all available model options. 
 
 CLI commands:
 - Type 'exit', 'quit', 'q', 'e', 'bye' to exit
@@ -68,10 +81,17 @@ print(response)
 
 ## Development
 
-```
-# Install development dependencies
-make install
+Clone the repository and install in development mode:
 
+```
+git clone https://github.com/yourusername/chatdb.git
+cd chatdb
+make install
+```
+
+Development commands:
+
+```
 # Run tests
 make test
 

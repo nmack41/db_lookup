@@ -1,3 +1,5 @@
+from typing import cast
+
 from pydantic_ai.models import KnownModelName, Model
 
 
@@ -12,17 +14,13 @@ def build_model_from_name_and_api_key(model_name: KnownModelName, api_key: str) 
         return AnthropicModel(model_name[10:], api_key=api_key)
 
     elif model_name.startswith("google-gla:"):
-        from pydantic_ai.models.gemini import GeminiModel
+        from pydantic_ai.models.gemini import GeminiModel, GeminiModelName
 
-        return GeminiModel(model_name[11:], api_key=api_key)
-    elif model_name.startswith("google-vertex:"):
-        from pydantic_ai.models.vertexai import VertexAIModel
-
-        return VertexAIModel(model_name[14:], api_key=api_key)
+        return GeminiModel(cast(GeminiModelName, model_name[11:]), api_key=api_key)
     elif model_name.startswith("groq:"):
-        from pydantic_ai.models.groq import GroqModel
+        from pydantic_ai.models.groq import GroqModel, GroqModelName
 
-        return GroqModel(model_name[5:], api_key=api_key)
+        return GroqModel(cast(GroqModelName, model_name[5:]), api_key=api_key)
     elif model_name.startswith("mistral:"):
         from pydantic_ai.models.mistral import MistralModel
 
