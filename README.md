@@ -1,22 +1,21 @@
 # ChatDB
 
-Use AI to query your database using natural language. ChatDB provides a CLI and web interface for interacting with databases using various AI models including OpenAI GPT-4, Anthropic Claude, and Mistral.
+Use AI to query your database using natural language. Ask questions about your schema, data or optimisation suggestions.
 
 ## Features
 
-- Natural language to SQL translation
+- Automatically generates and executes SQL queries based on natural language input
 - Support all major databases (PostgreSQL, MySQL, Oracle, MSSQL, SQLite)
-- Support for multiple AI providers:
-  - OpenAI (GPT-4, GPT-3.5)
-  - Anthropic (Claude)
-  - Mistral
-  - Google (Gemini, VertexAI)
-  - Groq
-  - Ollama
-- Automatic schema detection
-- SQL query execution with formatted results
-- Markdown-formatted responses
-- Interactive CLI interface
+- Support for multiple AI providers (OpenAI, Anthropic, Mistral, Google, Groq, Ollama)
+- Automatic schema introspection
+- Interactive CLI interface with Markdown-formatted responses and tab completion
+- Query history and result tracking
+- Efficient handling & display of large result sets (avoids having the LLM generate the data in its response)
+
+TODO:
+- Streaming responses
+- Web interface with graph plotting
+
 
 ## Installation
 
@@ -39,7 +38,7 @@ Run the CLI with your model choice and API key:
 
 ```
 # Using OpenAI
-python -m chatdb.cli --model-name provider:model_name --api-key your_api_key --db-uri postgresql://user:pass@localhost:5432/dbname
+python -m chatdb --model-name provider:model_name --api-key your_api_key --db-uri postgresql://user:pass@localhost:5432/dbname
 
 ```
 
@@ -50,34 +49,21 @@ Supported databases and their connection strings:
 - MSSQL: `mssql+pyodbc://user:pass@localhost/dbname`
 - SQLite: `sqlite:///path/to/db.sqlite3`
 
-Use `--help` to see all available model options. 
+Use `--help` to see available model options (newer ones not in the list should also work)
 
 CLI commands:
-- Type 'exit', 'quit', 'q', 'e', 'bye' to exit
-- Type '/clear' to clear message history
+- `/quit` or `/exit` - Exit the CLI
+- `/clear` - Clear conversation history (context provided to the LLM)
+- `/sql <query>` - Execute SQL query directly
+- `/schema [table1,table2,...]` - Show database schema (optionally for specific tables)
+- `/result` - Show details & results of the last executed query
 
 
-## Example
+## Logging
 
-```python
-from chatdb.agent import get_agent
-from chatdb.database import Database
-from chatdb.models import KnownModelName
+ChatDB uses [Logfire](https://github.com/logfire-sh/logfire) for logging (via `pydantic-ai`). 
+Check [here](https://logfire.pydantic.dev/docs/#logfire) for how to authroise and configure your Logfire project to receive logs from ChatDB.
 
-# Connect to database
-db = Database("postgresql://user:pass@localhost:5432/dbname")
-
-# Initialize agent
-agent = get_agent(
-    model_name=KnownModelName("openai:gpt-4"),
-    api_key="your-api-key",
-    database=db
-)
-
-# Query in natural language
-response = agent.chat("Show me the top 10 customers by order value")
-print(response)
-```
 
 ## Development
 
@@ -102,14 +88,6 @@ make format
 make lint
 ```
 
-## Configuration
-
-The project uses `pyproject.toml` for configuration:
-- Python version: >=3.10
-- Code style: 120 character line length
-- Strict type checking with mypy
-- Comprehensive linting with ruff
-
 ## Contributing
 
 1. Fork the repository
@@ -125,6 +103,11 @@ MIT License
 ## Credits
 
 Built with:
-- [pydantic-ai](https://github.com/jxnl/pydantic-ai) - AI model integration
-- [SQLAlchemy](https://www.sqlalchemy.org/) - Database connectivity
+- [pydantic-ai](https://github.com/jxnl/pydantic-ai) - AI model integration with [Logfire](https://github.com/logfire-sh/logfire) logging
+- [SQLAlchemy](https://www.sqlalchemy.org/) - Database connectivity & schema introspection
+- [Rich](https://github.com/Textualize/rich) - Rich text rendering
+- [Readline](https://docs.python.org/3/library/readline.html) - Tab completion
+
+
+
 
