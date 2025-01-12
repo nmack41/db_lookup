@@ -1,3 +1,7 @@
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+
+import logfire
 from sqlalchemy import (
     MetaData,
     Row,
@@ -7,6 +11,60 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy.sql.schema import ForeignKeyConstraint
+
+
+@dataclass
+class QueryResult:
+    """Container for SQL query and its results."""
+
+    sql: str
+    rows: list[Row]
+    executed_at: datetime
+    duration: timedelta | None = None
+    error: Exception | None = None
+
+    @property
+    def success(self) -> bool:
+        return self.error is None
+
+    @property
+    def row_count(self) -> int:
+        return len(self.rows)
+
+    @property
+    def columns(self) -> list[str] | None:
+        """Get column names if there are results."""
+        if self.rows:
+            return list(self.rows[0]._fields)
+        return None
+
+    def to_markdown(self, include_sql: bool = True) -> str:
+        """Format query results as a markdown table."""
+        md = ""
+        if include_sql:
+            md += f"```sql\n{self.sql}\n```\n\n"
+
+        if self.error:
+            md += f"❌ Error: {str(self.error)}\n"
+            return md
+
+        duration_str = f"{self.duration.total_seconds():.3f}s" if self.duration else "unknown"
+        md += f"✓ Executed in {duration_str}\n\n"
+
+        if not self.rows or not self.columns:
+            md += "No results"
+            return md
+
+        # Build results table
+        md += "| " + " | ".join(self.columns) + " |\n"
+        md += "|" + "|".join(["---"] * len(self.columns)) + "|\n"
+
+        # Add data rows
+        for row in self.rows:
+            values = [str(val) if val is not None else "" for val in row]
+            md += "| " + " | ".join(values) + " |\n"
+
+        return md
 
 
 class Database:
@@ -19,14 +77,16 @@ class Database:
             db_uri: SQLAlchemy connection string for the database
         """
         self.engine = create_engine(db_uri)
+        logfire.instrument_sqlalchemy(engine=self.engine)
         self.metadata = MetaData()
         self.metadata.reflect(bind=self.engine)
+        self.last_query: QueryResult | None = None
 
     @property
     def provider(self) -> str:
         return self.engine.dialect.name
 
-    def execute_query(self, query: str) -> list[Row]:
+    def execute_query(self, query: str) -> QueryResult:
         """Execute a SQL query and return results.
 
         Args:
@@ -35,12 +95,28 @@ class Database:
         Returns:
             List of dictionaries containing query results
         """
+        result = QueryResult(
+            sql=query,
+            rows=[],
+            executed_at=datetime.now(),
+        )
+
         with self.engine.connect() as conn:
-            result = conn.execute(text(query))
-            if result.returns_rows:
-                return list(result)
-            else:
-                return []
+            try:
+                start_time = datetime.now()
+                sql_result = conn.execute(text(query))
+                if sql_result.returns_rows:
+                    result.rows = list(sql_result)
+                else:
+                    result.rows = []
+            except Exception as e:
+                result.error = e
+                raise
+            finally:
+                result.duration = datetime.now() - start_time
+                self.last_query = result
+
+        return result
 
     def get_tables(self) -> list[Table]:
         """Get list of all tables in the database.
@@ -49,6 +125,10 @@ class Database:
             List of table names
         """
         return list(self.metadata.tables.values())
+
+    def describe_schema(self) -> str:
+        """Get a sring repoesentation of the structure of all the tables in the database"""
+        return "\n\n".join(format_table_schema(table) for table in self.get_tables())
 
 
 def format_table_schema(table: Table) -> str:

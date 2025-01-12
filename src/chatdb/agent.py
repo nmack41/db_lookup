@@ -1,29 +1,67 @@
+import time
 from dataclasses import dataclass
-from typing import Any
+from typing import Generic, TypeVar
 
-from pydantic import BaseModel
-from pydantic_ai import Agent, RunContext
+from pydantic_ai import Agent, UnexpectedModelBehavior
+from pydantic_ai.messages import ModelMessage
 from pydantic_ai.models import KnownModelName
 
-from chatdb.database import Database, format_table_schema
-from chatdb.models import build_model_from_name_and_api_key
+from chatdb.database import Database
+from chatdb.deps import AgentDeps
+from chatdb.llm import build_model_from_name_and_api_key
+from chatdb.tools import execute_sql, show_result_table
+
+T = TypeVar("T")
 
 
 @dataclass
-class AgentDeps:
-    database: Database
+class AgentRunner(Generic[T]):
+    """
+    Class which wraps an Agent to facilitate agent execution by:
+    - Automatically retrying on overload
+    - Maintaining and managing message history
+    - Providing dependenices
+    """
+
+    agent: Agent[T, str]
+    deps: T
+    message_history: list[ModelMessage] | None = None
+
+    def clear_message_history(self) -> None:
+        """Clear the message history."""
+        self.message_history = None
+
+    def run_sync(self, query: str, max_retries: int = 3) -> str:
+        """Run a query with automatic retries on overload."""
+        retries = 0
+        while retries < max_retries:
+            try:
+                response = self.agent.run_sync(query, deps=self.deps, message_history=self.message_history)
+                self.message_history = response.all_messages()
+                return response.data
+            except UnexpectedModelBehavior as e:
+                if "503" in str(e) and "overloaded" in str(e):
+                    retries += 1
+                    if retries < max_retries:
+                        time.sleep(0.1)  # Wait 100ms before retry
+                        continue
+                raise
 
 
-def get_agent(model_name: KnownModelName, api_key: str, database: Database) -> Agent[AgentDeps, str]:
+def get_agent_runner(model_name: KnownModelName, api_key: str, deps: AgentDeps) -> AgentRunner[AgentDeps]:
     model = build_model_from_name_and_api_key(model_name, api_key)
 
-    agent = Agent(model=model, deps_type=AgentDeps, system_prompt=get_system_prompt(database), tools=[execute_sql])
-    return agent
+    agent = Agent(
+        model=model,
+        deps_type=AgentDeps,
+        system_prompt=get_system_prompt(deps.database),
+        tools=[execute_sql, show_result_table],
+    )
+    return AgentRunner(agent, deps=deps)
 
 
 def get_system_prompt(database: Database) -> str:
-    tables = database.get_tables()
-    database_schema = "\n\n".join([format_table_schema(table) for table in tables])
+    database_schema = database.describe_schema()
 
     return (
         f"You are a helpful assistant and database and SQL expert that can answer questions about the data and "
@@ -33,20 +71,7 @@ def get_system_prompt(database: Database) -> str:
         "apprioriate SQL and execute it using the *execute_sql* tool. \n"
         "Try to avoid database queries where possible if the data is already available from a previous query. \n"
         "Use Markdown formatting to make the output more readable when necessary. \n"
-        f"The database schema is: \n{database_schema}"
+        "If you need to display the result of a previous query, use the *show_result_table* tool instead of "
+        "formatting the data as a table in your response. \n"
+        f"# Database Schema \n{database_schema}"
     )
-
-
-class DBQueryResult(BaseModel):
-    columns: list[str] | None = None
-    rows: list[list[Any]] | None = None
-    notes: str | None = None
-
-
-def execute_sql(ctx: RunContext[AgentDeps], sql: str) -> DBQueryResult:
-    """Execute the given SQL query and return the result."""
-    rows = ctx.deps.database.execute_query(sql)
-    if not rows:
-        return DBQueryResult(notes="No results")
-    else:
-        return DBQueryResult(columns=rows[0]._fields, rows=[list(row) for row in rows])
