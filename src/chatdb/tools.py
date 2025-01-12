@@ -1,10 +1,11 @@
 from typing import Any
 
 from pydantic import BaseModel
-from pydantic_ai import RunContext
+from pydantic_ai import ModelRetry, RunContext
 from rich.markdown import Markdown
 
-from chatdb.deps import AgentDeps
+from chatdb.database import InvalidQueryError
+from chatdb.deps import AgentDeps, CLIAgentDeps
 
 
 class DBQueryResponse(BaseModel):
@@ -16,20 +17,30 @@ class DBQueryResponse(BaseModel):
 
 
 def execute_sql(ctx: RunContext[AgentDeps], sql: str) -> DBQueryResponse:
-    """Execute the given SQL query and return the result."""
-    result = ctx.deps.database.execute_query(sql)
+    """Execute the given SQL query and return the result.
+    The results may be truncated if they contain lots of data."""
+    try:
+        result = ctx.deps.database.execute_sql(sql)
+    except InvalidQueryError as e:
+        raise ModelRetry(str(e)) from e
+
     if not result.rows:
         return DBQueryResponse(note="No results")
     else:
-        rows = [list(row) for row in result.rows[: ctx.deps.max_rows]]
-        notes = None
-        if len(result.rows) > ctx.deps.max_rows:
-            notes = f"Query returned {len(result.rows)} rows, showing first {ctx.deps.max_rows} only"
-        return DBQueryResponse(columns=result.columns, rows=rows, note=notes)
+        assert result.columns is not None
+        # Calculate number of rows to return
+        max_return_rows = 5 + ctx.deps.max_return_values // len(result.columns)
+        rows = [list(row) for row in result.rows[:max_return_rows]]
+        note = None
+        if len(result.rows) > max_return_rows:
+            note = f"Query returned {len(result.rows)} rows, showing first {max_return_rows} only"
+        return DBQueryResponse(columns=result.columns, rows=rows, note=note)
 
 
-def show_result_table(ctx: RunContext[AgentDeps]) -> str:
-    """Display the result of the previous database query as a markdown table."""
+def show_result_table(ctx: RunContext[CLIAgentDeps]) -> str:
+    """Display the entire result of the previous database query as a markdown table.
+    (Not just the first X rows that were returned by the *execute_sql* tool.)
+    Call this tool instead of formatting the data as a table in your response."""
     result = ctx.deps.database.last_query
     if not result:
         return "No previous query results."

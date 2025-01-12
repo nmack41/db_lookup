@@ -8,6 +8,10 @@ from chatdb.database import Database
 @dataclass
 class AgentDeps:
     database: Database
+    # Maximum number of DB result values (rows X columns) to return to the LLM
+    max_return_values: int
+
+
+@dataclass
+class CLIAgentDeps(AgentDeps):
     console: Console
-    # Maximum number of DB result rows to show the LLM
-    max_rows: int = 20

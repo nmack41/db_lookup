@@ -67,6 +67,14 @@ class QueryResult:
         return md
 
 
+class InvalidQueryError(Exception):
+    """Exception raised for invalid SQL queries."""
+
+
+class TableNotFoundError(Exception):
+    """Exception raised for invalid table names."""
+
+
 class Database:
     """A class to interact with a SQL database using SQLAlchemy."""
 
@@ -77,17 +85,17 @@ class Database:
             db_uri: SQLAlchemy connection string for the database
         """
         self.engine = create_engine(db_uri)
-        logfire.instrument_sqlalchemy(engine=self.engine)
         self.metadata = MetaData()
         self.metadata.reflect(bind=self.engine)
         self.last_query: QueryResult | None = None
+        logfire.instrument_sqlalchemy(engine=self.engine)
 
     @property
     def provider(self) -> str:
         return self.engine.dialect.name
 
-    def execute_query(self, query: str) -> QueryResult:
-        """Execute a SQL query and return results.
+    def execute_sql(self, sql_query: str) -> QueryResult:
+        """Execute a SQL query and return results. Only allows SELECT style queries.
 
         Args:
             query: SQL query string to execute
@@ -95,8 +103,11 @@ class Database:
         Returns:
             List of dictionaries containing query results
         """
+        if not sql_query.strip().startswith("SELECT"):
+            raise InvalidQueryError("Only SELECT style queries are allowed")
+
         result = QueryResult(
-            sql=query,
+            sql=sql_query,
             rows=[],
             executed_at=datetime.now(),
         )
@@ -104,7 +115,7 @@ class Database:
         with self.engine.connect() as conn:
             try:
                 start_time = datetime.now()
-                sql_result = conn.execute(text(query))
+                sql_result = conn.execute(text(sql_query))
                 if sql_result.returns_rows:
                     result.rows = list(sql_result)
                 else:
@@ -118,6 +129,10 @@ class Database:
 
         return result
 
+    @property
+    def table_names(self) -> list[str]:
+        return list(self.metadata.tables.keys())
+
     def get_tables(self) -> list[Table]:
         """Get list of all tables in the database.
 
@@ -126,9 +141,16 @@ class Database:
         """
         return list(self.metadata.tables.values())
 
-    def describe_schema(self) -> str:
-        """Get a sring repoesentation of the structure of all the tables in the database"""
-        return "\n\n".join(format_table_schema(table) for table in self.get_tables())
+    def describe_schema(self, table_names: list[str] | None = None) -> str:
+        """Get a sring representation of the structure of tables in the database (all by default)"""
+        if table_names:
+            try:
+                tables = [self.metadata.tables[table] for table in table_names]
+            except KeyError as e:
+                raise TableNotFoundError(f"Invalid table name: {e}") from e
+        else:
+            tables = self.get_tables()
+        return "\n\n".join(format_table_schema(table) for table in tables)
 
 
 def format_table_schema(table: Table) -> str:
@@ -155,7 +177,7 @@ def format_table_schema(table: Table) -> str:
         if not column.nullable:
             column_definition += " NOT NULL"
         if column.default:
-            column_definition += f" DEFAULT {column.default.arg}"
+            column_definition += f" DEFAULT {column.default.arg}"  # type: ignore
         if column.unique:
             column_definition += " UNIQUE"
         schema_lines.append(column_definition + ",")
