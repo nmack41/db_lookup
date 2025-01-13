@@ -11,6 +11,8 @@ from chatdb.database import Database
 from chatdb.deps import CLIAgentDeps
 
 
+EXIT_COMMANDS = ["/quit", "/exit", "/q"]
+
 def get_completer(autocompletes: Sequence[str]) -> Callable[[str, int], str | None]:
     def completer(text: str, state: int) -> str | None:
         # List of commands to complete from
@@ -34,19 +36,19 @@ def run(model_name: KnownModelName, api_key: str, db_uri: str, max_return_values
     deps = CLIAgentDeps(database=database, console=console, max_return_values=max_return_values)
     agent_runner = get_agent_runner(model_name, api_key, deps=deps)
 
-    autocompletes = list(COMMAND_HANDLERS) + database.table_names
+    autocompletes = list(COMMAND_HANDLERS) + EXIT_COMMANDS + database.table_names
 
     readline.set_completer(get_completer(autocompletes))
     readline.parse_and_bind("tab: complete")  # Use Tab for auto-completion
     readline.set_completer_delims(" \t\n;")
 
-    console.print("Welcome to ChatDB CLI. Type 'exit' to exit. Enter a question: ")
+    console.print("Welcome to ChatDB CLI. Type '/exit' to exit. Enter a question: ")
     while True:
         query = input(">").strip()
         if not query:
             continue
 
-        if query.lower() in ["/quit", "exit", "quit", "q"]:
+        if query.lower() in EXIT_COMMANDS:
             break
 
         if query.startswith("/"):
