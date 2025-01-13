@@ -45,4 +45,4 @@ def show_result_table(ctx: RunContext[CLIAgentDeps]) -> str:
     if not result:
         return "No previous query results."
     ctx.deps.console.print(Markdown(result.to_markdown(include_sql=False)))
-    return "Result displayed."
+    return "Result displayed, DO NOT also provide the result data in your response."

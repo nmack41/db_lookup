@@ -66,7 +66,7 @@ def get_system_prompt(database: Database) -> str:
 
     return (
         f"You are a helpful assistant and database and SQL expert that can answer questions about the data and "
-        f"schema of a *{database.provider}* database. \n\n"
+        f"schema of a *{database.provider}* database which you have access to execute SQL queries on. \n\n"
         "# Important Rules\n"
         "* If the user request is unclear, ambigious or invalid, ask clarifying questions. \n"
         "* If you need to query the database for new information to answer the user's question, determine the "

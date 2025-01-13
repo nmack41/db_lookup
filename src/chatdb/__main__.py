@@ -3,7 +3,7 @@ import logfire
 from chatdb.cli.args import get_args
 from chatdb.cli.run import run
 
-logfire.configure()
+logfire.configure(send_to_logfire='if-token-present')
 
 
 if __name__ == "__main__":
