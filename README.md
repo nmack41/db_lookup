@@ -38,7 +38,10 @@ Run the CLI with your model choice and API key:
 
 ```
 # Using OpenAI
-python -m chatdb --model-name provider:model_name --api-key your_api_key --db-uri postgresql://user:pass@localhost:5432/dbname
+python -m chatdb \
+    --model provider:model_name \
+    --api-key your_api_key \
+    --db-uri postgresql://user:pass@localhost:5432/dbname
 
 ```
 
@@ -62,7 +65,14 @@ CLI commands:
 ## Logging
 
 ChatDB uses [Logfire](https://github.com/logfire-sh/logfire) for logging (via `pydantic-ai`). 
-Check [here](https://logfire.pydantic.dev/docs/#logfire) for how to authroise and configure your Logfire project to receive logs from ChatDB.
+Check [here](https://logfire.pydantic.dev/docs/#logfire) for how to authorize and configure your Logfire project to receive logs from ChatDB.
+
+Use the `--log-level` option to control logging verbosity:
+- `DEBUG` - Show all debug information
+- `INFO` - Show general information (default)
+- `WARNING` - Show only warnings and errors
+- `ERROR` - Show only errors
+- `CRITICAL` - Show only critical errors
 
 
 ## Development

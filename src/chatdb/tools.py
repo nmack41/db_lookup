@@ -9,7 +9,7 @@ from chatdb.deps import AgentDeps, CLIAgentDeps
 
 
 class DBQueryResponse(BaseModel):
-    """Result of a database query, to provide to the LLM"""
+    """Result of a database query"""
 
     columns: list[str] | None = None
     rows: list[list[Any]] | None = None
@@ -17,7 +17,14 @@ class DBQueryResponse(BaseModel):
 
 
 def execute_sql(ctx: RunContext[AgentDeps], sql: str) -> DBQueryResponse:
-    """Execute the given SQL query and return the result.
+    """Execute the given SQL query and return the result in format:
+    ```json
+    {
+        "columns": ["column1", "column2", ...],
+        "rows": [[row1_value1, row1_value2, ...], [row2_value1, row2_value2, ...], ...],
+        "note": "Optional note about the query"
+    }
+    ```
     The results may be truncated if they contain lots of data."""
     try:
         result = ctx.deps.database.execute_sql(sql)

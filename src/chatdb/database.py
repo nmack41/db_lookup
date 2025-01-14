@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Any
 
 import logfire
 from sqlalchemy import (
@@ -18,7 +19,7 @@ class QueryResult:
     """Container for SQL query and its results."""
 
     sql: str
-    rows: list[Row]
+    rows: list[Row[Any]]
     executed_at: datetime
     duration: timedelta | None = None
     error: Exception | None = None
@@ -113,8 +114,8 @@ class Database:
         )
 
         with self.engine.connect() as conn:
+            start_time = datetime.now()
             try:
-                start_time = datetime.now()
                 sql_result = conn.execute(text(sql_query))
                 if sql_result.returns_rows:
                     result.rows = list(sql_result)

@@ -10,8 +10,8 @@ from chatdb.cli.special_commands import COMMAND_HANDLERS, handle_special_command
 from chatdb.database import Database
 from chatdb.deps import CLIAgentDeps
 
-
 EXIT_COMMANDS = ["/quit", "/exit", "/q"]
+
 
 def get_completer(autocompletes: Sequence[str]) -> Callable[[str, int], str | None]:
     def completer(text: str, state: int) -> str | None:
@@ -42,7 +42,9 @@ def run(model_name: KnownModelName, api_key: str, db_uri: str, max_return_values
     readline.parse_and_bind("tab: complete")  # Use Tab for auto-completion
     readline.set_completer_delims(" \t\n;")
 
-    console.print("Welcome to ChatDB CLI. Type '/exit' to exit. Enter a question: ")
+    console.print(
+        "Welcome to ChatDB CLI! Type '/exit' or '/q' to exit. What would you like to know about your database? "
+    )
     while True:
         query = input(">").strip()
         if not query:

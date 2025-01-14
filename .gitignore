@@ -39,3 +39,4 @@ ENV/
 *.swo 
 
 *.db
+.aider*
