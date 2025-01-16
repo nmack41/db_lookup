@@ -1,3 +1,5 @@
+import csv
+import io
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
@@ -66,6 +68,16 @@ class QueryResult:
             md += "| " + " | ".join(values) + " |\n"
 
         return md
+
+    def to_csv(self) -> str:
+        """Format query results as a CSV string."""
+        if not self.columns:
+            return ""
+        buffer = io.StringIO()
+        writer = csv.writer(buffer)
+        writer.writerow(self.columns)
+        writer.writerows(self.rows)
+        return buffer.getvalue()
 
 
 class InvalidQueryError(Exception):

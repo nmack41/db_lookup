@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Dict, Protocol
 
 from rich.markdown import Markdown
@@ -43,11 +44,35 @@ def handle_schema(arg: str, agent_runner: AgentRunner[CLIAgentDeps]) -> None:
     console.print(Markdown(f"```\n{schema}\n```"))
 
 
+def handle_export(arg: str, agent_runner: AgentRunner[CLIAgentDeps]) -> None:
+    """Export the most recent query results to a CSV file."""
+    console = agent_runner.deps.console
+
+    last_query = agent_runner.deps.database.last_query
+    if not last_query or not last_query.rows:
+        console.print("[red]No query results to export[/red]")
+        return
+
+    # Use provided filename or generate one
+    filename = arg if arg else "query_results.csv"
+    if not filename.endswith(".csv"):
+        filename += ".csv"
+
+    path = Path(filename)
+    try:
+        with path.open("wt", newline="") as f:
+            f.write(last_query.to_csv())
+        console.print(f"[green]Results exported to {path.absolute()}[/green]")
+    except Exception as e:
+        console.print(f"[red]Error exporting results: {str(e)}[/red]")
+
+
 COMMAND_HANDLERS: Dict[str, CommandHandler] = {
     "/result": handle_result,
     "/clear": handle_clear,
     "/sql": handle_sql,
     "/schema": handle_schema,
+    "/export": handle_export,
 }
 
 

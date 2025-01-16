@@ -14,7 +14,6 @@ Use AI to query your database using natural language. Ask questions about your s
 
 TODO:
 - Streaming responses
-- Data export (CSV, JSON, etc.)
 - Web interface with graph plotting
 
 
@@ -62,6 +61,7 @@ CLI commands:
 - `/sql <query>` - Execute SQL query directly
 - `/schema [table1,table2,...]` - Show database schema (optionally for specific tables)
 - `/result` - Show details & results of the last executed query by the LLM
+- `/export [filename]` - Export last query results to CSV (defaults to query_results.csv)
 
 ## Logging
 
