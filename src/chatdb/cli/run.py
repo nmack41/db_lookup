@@ -22,7 +22,7 @@ def get_completer(autocompletes: Sequence[str]) -> Callable[[str, int], str | No
     return completer
 
 
-def run(model_name: KnownModelName, api_key: str, db_uri: str, max_return_values: int = 200) -> None:
+def run(db_uri: str, model_name: KnownModelName, api_key: str | None = None, max_return_values: int = 200) -> None:
     """Run the ChatDB CLI.
 
     Args:
@@ -34,7 +34,7 @@ def run(model_name: KnownModelName, api_key: str, db_uri: str, max_return_values
     console = Console()
     database = Database(db_uri)
     deps = CLIAgentDeps(database=database, console=console, max_return_values=max_return_values)
-    agent_runner = get_agent_runner(model_name, api_key, deps=deps)
+    agent_runner = get_agent_runner(model_name, deps, api_key=api_key)
 
     autocompletes = list(COMMAND_HANDLERS) + EXIT_COMMANDS + database.table_names
 

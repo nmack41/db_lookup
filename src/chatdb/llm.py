@@ -3,7 +3,7 @@ from typing import cast
 from pydantic_ai.models import KnownModelName, Model
 
 
-def build_model_from_name_and_api_key(model_name: KnownModelName, api_key: str) -> Model:
+def build_model_from_name_and_api_key(model_name: KnownModelName, api_key: str | None = None) -> Model:
     if model_name.startswith("openai:"):
         from pydantic_ai.models.openai import OpenAIModel
 
@@ -28,6 +28,6 @@ def build_model_from_name_and_api_key(model_name: KnownModelName, api_key: str) 
     elif model_name.startswith("ollama:"):
         from pydantic_ai.models.ollama import OllamaModel
 
-        return OllamaModel(model_name[7:], api_key=api_key)
+        return OllamaModel(model_name[7:], api_key=api_key or "ollama")
     else:
         raise ValueError(f"Unsupported model name: {model_name}")

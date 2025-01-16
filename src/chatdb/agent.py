@@ -55,7 +55,7 @@ class AgentRunner(Generic[DepsT]):
                 raise
 
 
-def get_agent_runner(model_name: KnownModelName, api_key: str, deps: DepsT) -> AgentRunner[DepsT]:
+def get_agent_runner(model_name: KnownModelName, deps: DepsT, api_key: str | None = None) -> AgentRunner[DepsT]:
     model = build_model_from_name_and_api_key(model_name, api_key)
 
     agent = Agent(

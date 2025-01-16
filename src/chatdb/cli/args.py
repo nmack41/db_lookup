@@ -44,8 +44,9 @@ def get_cli_args() -> argparse.Namespace:
     parser.add_argument(
         "--api-key",
         type=str,
-        required=True,
-        help="API key for the model service",
+        default=None,
+        help="API key for the LLM provider API. If not provided, "
+        "will attempt to use environment variables GEMINI_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY, etc.",
     )
     parser.add_argument(
         "--debug",

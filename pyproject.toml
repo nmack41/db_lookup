@@ -10,7 +10,7 @@ requires-python = ">=3.10"
 dependencies = [
     "sqlalchemy>=2.0.0",
     "pydantic>=2.0.0",
-    "pydantic-ai[logfire]>=0.0.18", # Installs all model dependencies
+    "pydantic-ai[logfire]>=0.0.19", # Installs all model dependencies
     "logfire[sqlalchemy]>=3.1.0",
     "gnureadline>=8.2.0",
     "rich>=13.0.0",
