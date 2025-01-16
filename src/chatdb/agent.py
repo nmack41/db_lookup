@@ -1,9 +1,7 @@
-import time
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 
-import logfire
-from pydantic_ai import Agent, UnexpectedModelBehavior
+from pydantic_ai import Agent
 from pydantic_ai.messages import ModelMessage
 from pydantic_ai.models import Model
 from pydantic_ai.result import RunResult
@@ -32,26 +30,11 @@ class AgentRunner(Generic[DepsT]):
         """Clear the message history."""
         self.message_history = None
 
-    def run_sync(self, query: str, max_retries: int = 3) -> RunResult[str]:
-        """Run a query with automatic retries on overload."""
-        retries = 0
-        while True:
-            try:
-                response = self.agent.run_sync(query, deps=self.deps, message_history=self.message_history)
-                self.message_history = response.all_messages()
-                return response
-            except UnexpectedModelBehavior as e:
-                if "503" in str(e) and "overloaded" in str(e):
-                    retries += 1
-                    if retries < max_retries:
-                        logfire.warn(
-                            f"Model overloaded, retrying request {retries}/{max_retries}",
-                            retries=retries,
-                            max_retries=max_retries,
-                        )
-                        time.sleep(0.1)  # Wait 100ms before retry
-                        continue
-                raise
+    def run_sync(self, query: str) -> RunResult[str]:
+        """Run a query and automatically provide dependencies and message history."""
+        response = self.agent.run_sync(query, deps=self.deps, message_history=self.message_history)
+        self.message_history = response.all_messages()
+        return response
 
 
 def get_agent_runner(model: Model, deps: DepsT) -> AgentRunner[DepsT]:
