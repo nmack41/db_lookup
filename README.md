@@ -16,6 +16,36 @@ TODO:
 - Streaming responses
 - Web interface with graph plotting
 
+## Example
+
+```md
+Welcome to ChatDB CLI! Type '/exit' or '/q' to exit. What would you like to know about your database? 
+You: Provide a brief description of each table
+ChatDB: Okay, here's a brief description of each table:
+
+ • Categories: Stores information about product categories, such as the category name and description.     
+ • Customers: Contains information about customers, such as their company name, contact details, and address.
+ • Employees: Stores information about employees, such as their name, job title, and contact information.                                         
+ • Order Details: Contains details about individual items within an order, such as the product, quantity, and price.                                               
+ • Orders: Contains information about customer orders, including order date, ship details, and associated customer and employee IDs.           
+ • Products: Stores information about products, such as the product name, category, supplier, and price.
+
+You: How many customers are there?
+ChatDB: There are 93 customers.
+You: Show the name, phone number and city for all customers from Germany
+                                                       
+  CompanyName                Phone          City            
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 
+  Alfreds Futterkiste        030-0074321    Berlin          
+  Blauer See Delikatessen    0621-08460     Mannheim        
+  Drachenblut Delikatessen   0241-039123    Aachen          
+  Frankenversand             089-0877310    München         
+  Königlich Essen            0555-09876     Brandenburg     
+  Lehmanns Marktstand        069-0245984    Frankfurt a.M.  
+              
+ChatDB: Okay, I've displayed the results showing the company name, phone number, and city for all customers from Germany.
+```
+
 
 ## Installation
 
@@ -28,7 +58,6 @@ pip install git+https://github.com/Finndersen/chatdb.git[all]
 # Install with specific database drivers (choose one or more)
 pip install git+https://github.com/Finndersen/chatdb.git[postgres, mysql, oracle, mssql]
 ```
-
 
 ## Usage
 
@@ -62,6 +91,7 @@ CLI commands:
 - `/schema [table1,table2,...]` - Show database schema (optionally for specific tables)
 - `/result` - Show details & results of the last executed query by the LLM
 - `/export [filename]` - Export last query results to CSV (defaults to query_results.csv)
+
 
 ## Logging
 
