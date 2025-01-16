@@ -41,18 +41,23 @@ class QueryResult:
             return list(self.rows[0]._fields)
         return None
 
-    def to_markdown(self, include_sql: bool = True) -> str:
-        """Format query results as a markdown table."""
+    def to_markdown(self, include_details: bool = True) -> str:
+        """Format query results as a markdown table.
+
+        Args:
+            include_details: Whether to include the SQL query and execution time in the output
+        """
         md = ""
-        if include_sql:
+
+        if include_details:
             md += f"```sql\n{self.sql}\n```\n\n"
+            if self.duration:
+                duration_str = f"{self.duration.total_seconds():.3f}s"
+                md += f"✓ Executed in {duration_str}\n\n"
 
         if self.error:
             md += f"❌ Error: {str(self.error)}\n"
             return md
-
-        duration_str = f"{self.duration.total_seconds():.3f}s" if self.duration else "unknown"
-        md += f"✓ Executed in {duration_str}\n\n"
 
         if not self.rows or not self.columns:
             md += "No results"
@@ -73,8 +78,8 @@ class QueryResult:
         """Format query results as a CSV string."""
         if not self.columns:
             return ""
-        buffer = io.StringIO()
-        writer = csv.writer(buffer)
+        buffer = io.StringIO(newline="")
+        writer = csv.writer(buffer, lineterminator="\n")
         writer.writerow(self.columns)
         writer.writerows(self.rows)
         return buffer.getvalue()
@@ -119,25 +124,28 @@ class Database:
         if not sql_query.strip().startswith("SELECT"):
             raise InvalidQueryError("Only SELECT style queries are allowed")
 
-        result = QueryResult(
-            sql=sql_query,
-            rows=[],
-            executed_at=datetime.now(),
-        )
-
+        rows = []
+        error = None
         with self.engine.connect() as conn:
             start_time = datetime.now()
             try:
                 sql_result = conn.execute(text(sql_query))
                 if sql_result.returns_rows:
-                    result.rows = list(sql_result)
-                else:
-                    result.rows = []
+                    rows = list(sql_result)
             except Exception as e:
-                result.error = e
+                # When an error occurs, details are stored in last_query, but
+                # exception is re-raised
+                error = e
                 raise
             finally:
-                result.duration = datetime.now() - start_time
+                duration = datetime.now() - start_time
+                result = QueryResult(
+                    sql=sql_query,
+                    rows=rows,
+                    executed_at=start_time,
+                    duration=duration,
+                    error=error,
+                )
                 self.last_query = result
 
         return result
