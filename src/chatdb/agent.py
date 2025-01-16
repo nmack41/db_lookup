@@ -17,7 +17,6 @@ DepsT = TypeVar("DepsT", bound=AgentDeps)
 class AgentRunner(Generic[DepsT]):
     """
     Class which wraps an Agent to facilitate agent execution by:
-    - Automatically retrying on API overload
     - Maintaining and managing message history
     - Providing dependenices
     """
