@@ -4,11 +4,13 @@ from typing import Callable, Sequence
 from pydantic_ai.models import KnownModelName
 from rich.console import Console
 from rich.markdown import Markdown
+from rich.prompt import Prompt
 
 from chatdb.agent import get_agent_runner
 from chatdb.cli.special_commands import COMMAND_HANDLERS, handle_special_command
 from chatdb.database import Database
 from chatdb.deps import CLIAgentDeps
+from chatdb.llm import build_model_from_name_and_api_key
 
 EXIT_COMMANDS = ["/quit", "/exit", "/q"]
 
@@ -34,7 +36,8 @@ def run(db_uri: str, model_name: KnownModelName, api_key: str | None = None, max
     console = Console()
     database = Database(db_uri)
     deps = CLIAgentDeps(database=database, console=console, max_return_values=max_return_values)
-    agent_runner = get_agent_runner(model_name, deps, api_key=api_key)
+    model = build_model_from_name_and_api_key(model_name, api_key)
+    agent_runner = get_agent_runner(model, deps)
 
     autocompletes = list(COMMAND_HANDLERS) + EXIT_COMMANDS + database.table_names
 
@@ -46,7 +49,7 @@ def run(db_uri: str, model_name: KnownModelName, api_key: str | None = None, max
         "Welcome to ChatDB CLI! Type '/exit' or '/q' to exit. What would you like to know about your database? "
     )
     while True:
-        query = input(">").strip()
+        query = Prompt.ask("You").strip()
         if not query:
             continue
 
@@ -58,4 +61,4 @@ def run(db_uri: str, model_name: KnownModelName, api_key: str | None = None, max
             continue
 
         response = agent_runner.run_sync(query)
-        console.print(Markdown(response.data))
+        console.print(Markdown("ChatDB: " + response.data))
