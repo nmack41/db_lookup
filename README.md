@@ -44,6 +44,8 @@ You: Show the name, phone number and city for all customers from Germany
   Lehmanns Marktstand        069-0245984    Frankfurt a.M.  
               
 ChatDB: Okay, I've displayed the results showing the company name, phone number, and city for all customers from Germany.
+You: /export customers_germany.csv
+Results exported to customers_germany.csv
 ```
 
 
