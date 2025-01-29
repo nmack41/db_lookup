@@ -53,6 +53,11 @@ def get_cli_args() -> argparse.Namespace:
         default=200,
         help="Maximum number of values (cells) to return to the LLM from a DB query",
     )
+    parser.add_argument(
+        "--stream",
+        action="store_true",
+        help="Enable streaming responses",
+    )
 
     args = parser.parse_args()
 

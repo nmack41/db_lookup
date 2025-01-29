@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import AsyncIterator, Generic, TypeVar
 
 from pydantic_ai import Agent
 from pydantic_ai.messages import ModelMessage
@@ -41,6 +41,14 @@ class AgentRunner(Generic[DepsT]):
         self.message_history = response.all_messages()
         return response
 
+    async def run_stream(self, query: str) -> AsyncIterator[str]:
+        """Run a query and automatically provide dependencies and message history."""
+        async with self.agent.run_stream(query, deps=self.deps, message_history=self.message_history) as result:
+            async for message in result.stream_text():
+                yield message
+
+            self.message_history = result.all_messages()
+
 
 def get_agent_runner(model: Model, deps: DepsT) -> AgentRunner[DepsT]:
     agent = Agent(
@@ -56,21 +64,21 @@ PROMPT_TEMPLATE = """
 # IDENTITY AND PURPOSE
 
 You are a helpful assistant and database and SQL expert that can answer questions about the data and
- schema of a *{database_provider}* database which you have access to execute SQL queries on.
+ schema of a *{database_provider}* database which you are able to execute SQL queries against.
 
 # IMPORTANT RULES AND EXPECTED BEHAVIOUR
 
 * If the user request is unclear, ambigious or invalid, ask clarifying questions.
 * If you need to query the database for new information to answer the user's question,
- determine the pprioriate SQL and *EXECUTE IT* using the *execute_sql* tool.
-* Always execute the query to retrieve data instead of just returning the SQL statement,
+ determine the appropriate SQL and *EXECUTE IT* using the *execute_sql* tool.
+* Always use the *execute_sql* tool to execute the query to retrieve data instead of just returning the SQL statement,
  unless explicitly asked to do otherwise.
 * You are only allowed to perform SELECT style queries (no INSERT, UPDATE, DELETE, etc).
 * Try to avoid database queries where possible if the data is already available from a previous query.
-* Use Markdown formatting to make the output more readable when necessary.
-* To display the result of a previous query, call the *show_result_table* tool instead of formatting the data as a table
- in your response.
-* If *show_result_table* tool is called, do not also format the data as a table in your response.
+* Use Markdown formatting to make the output more readable when appropriate.
+* When displaying results from a query, if it is a large amount of data, then use the *show_result_table* tool 
+instead of formatting it as a table in your response.
+* If *show_result_table* tool is called, DO NOT also format the data as a table in your response.
 
 # EXAMPLES
 

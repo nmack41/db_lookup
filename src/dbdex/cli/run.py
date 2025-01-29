@@ -3,6 +3,7 @@ from typing import Callable, Sequence
 
 from pydantic_ai.models import KnownModelName
 from rich.console import Console
+from rich.live import Live
 from rich.markdown import Markdown
 from rich.prompt import Prompt
 
@@ -24,7 +25,13 @@ def get_completer(autocompletes: Sequence[str]) -> Callable[[str, int], str | No
     return completer
 
 
-async def run(db_uri: str, model_name: KnownModelName, api_key: str | None = None, max_return_values: int = 200) -> None:
+async def run(
+    db_uri: str,
+    model_name: KnownModelName,
+    api_key: str | None = None,
+    max_return_values: int = 200,
+    stream: bool = False,
+) -> None:
     """Run the DBdex CLI.
 
     Args:
@@ -32,6 +39,7 @@ async def run(db_uri: str, model_name: KnownModelName, api_key: str | None = Non
         api_key: API key for the model service
         db_uri: Database connection URI. Defaults to sqlite:///db.sqlite3
         max_return_values: Maximum number of values to return to the LLM from a DB query
+        stream: Whether to stream responses from the LLM
     """
     console = Console()
     database = Database(db_uri)
@@ -60,5 +68,12 @@ async def run(db_uri: str, model_name: KnownModelName, api_key: str | None = Non
             handle_special_command(query, agent_runner)
             continue
 
-        response = await agent_runner.run(query)
-        console.print(Markdown("DBdex: " + response.data))
+        with Live(console=console, vertical_overflow="visible") as live_console:
+            live_console.update("DBdex:  ...")
+
+            if stream:
+                async for streamed_message in agent_runner.run_stream(query):
+                    live_console.update(Markdown("DBdex: " + streamed_message))
+            else:
+                response = await agent_runner.run(query)
+                live_console.update(Markdown("DBdex: " + response.data))
