@@ -35,6 +35,12 @@ class AgentRunner(Generic[DepsT]):
         self.message_history = response.all_messages()
         return response
 
+    async def run(self, query: str) -> RunResult[str]:
+        """Run a query and automatically provide dependencies and message history."""
+        response = await self.agent.run(query, deps=self.deps, message_history=self.message_history)
+        self.message_history = response.all_messages()
+        return response
+
 
 def get_agent_runner(model: Model, deps: DepsT) -> AgentRunner[DepsT]:
     agent = Agent(

@@ -24,7 +24,7 @@ def get_completer(autocompletes: Sequence[str]) -> Callable[[str, int], str | No
     return completer
 
 
-def run(db_uri: str, model_name: KnownModelName, api_key: str | None = None, max_return_values: int = 200) -> None:
+async def run(db_uri: str, model_name: KnownModelName, api_key: str | None = None, max_return_values: int = 200) -> None:
     """Run the DBdex CLI.
 
     Args:
@@ -60,5 +60,5 @@ def run(db_uri: str, model_name: KnownModelName, api_key: str | None = None, max
             handle_special_command(query, agent_runner)
             continue
 
-        response = agent_runner.run_sync(query)
+        response = await agent_runner.run(query)
         console.print(Markdown("DBdex: " + response.data))

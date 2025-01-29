@@ -9,7 +9,7 @@ def format_model_options() -> str:
     # Group models by provider
     grouped: defaultdict[str, list[str]] = defaultdict(list)
     for item in get_args(KnownModelName):
-        if item == "test" or item.startswith("google-vertex"):
+        if ":" not in item or item.startswith("google-vertex"):
             continue
         provider, model = item.split(":")
         grouped[provider].append(model)
