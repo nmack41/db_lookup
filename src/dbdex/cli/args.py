@@ -5,11 +5,11 @@ from typing import get_args
 from pydantic_ai.models import KnownModelName
 
 
-def format_model_options(model_options: list[str]) -> str:
+def format_model_options() -> str:
     # Group models by provider
     grouped: defaultdict[str, list[str]] = defaultdict(list)
-    for item in model_options:
-        if item == "test":
+    for item in get_args(KnownModelName):
+        if item == "test" or item.startswith("google-vertex"):
             continue
         provider, model = item.split(":")
         grouped[provider].append(model)
@@ -20,13 +20,7 @@ def format_model_options(model_options: list[str]) -> str:
 
 
 def get_cli_args() -> argparse.Namespace:
-    MODEL_OPTIONS = [
-        model_name
-        for model_name in get_args(KnownModelName)
-        if model_name != "test" and not model_name.startswith("google-vertex")
-    ]
-
-    parser = argparse.ArgumentParser(description="ChatDB CLI", formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description="DBdex CLI", formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument(
         "--db-uri",
         type=str,
@@ -37,7 +31,7 @@ def get_cli_args() -> argparse.Namespace:
         type=str,
         required=True,
         help="Name of the LLM model to use, in format provider:model (e.g. openai:gpt-4). "
-        "Choices (not exhaustive, more may be supported):\n" + format_model_options(MODEL_OPTIONS),
+        "Choices (not exhaustive, more may be supported):\n" + format_model_options(),
         metavar="PROVIDER:MODEL",
         # Don't strictly enforce choices since new models may be added
     )
