@@ -3,9 +3,9 @@ from typing import Dict, Protocol
 
 from rich.markdown import Markdown
 
-from chatdb.agent import AgentRunner
-from chatdb.database import TableNotFoundError
-from chatdb.deps import CLIAgentDeps
+from dbdex.agent import AgentRunner
+from dbdex.database import TableNotFoundError
+from dbdex.deps import CLIAgentDeps
 
 
 class CommandHandler(Protocol):

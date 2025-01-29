@@ -1,6 +1,6 @@
-# ChatDB
+# DBdex
 
-Use AI to query your database using natural language. Ask questions about your schema, data or optimisation suggestions.
+Like a Pokédex, but for your database. Uses AI to answer questions about your database data or schema using natural language.
 
 ## Features
 
@@ -19,9 +19,9 @@ TODO:
 ## Example
 
 ```md
-Welcome to ChatDB CLI! Type '/exit' or '/q' to exit. What would you like to know about your database? 
+Welcome to DBdex CLI! Type '/exit' or '/q' to exit. What would you like to know about your database? 
 You: Provide a brief description of each table
-ChatDB: Okay, here's a brief description of each table:
+DBdex: Okay, here's a brief description of each table:
 
  • Categories: Stores information about product categories, such as the category name and description.     
  • Customers: Contains information about customers, such as their company name, contact details, and address.
@@ -31,7 +31,7 @@ ChatDB: Okay, here's a brief description of each table:
  • Products: Stores information about products, such as the product name, category, supplier, and price.
 
 You: How many customers are there?
-ChatDB: There are 93 customers.
+DBdex: There are 93 customers.
 You: Show the name, phone number and city for all customers from Germany
                                                        
   CompanyName                Phone          City            
@@ -43,7 +43,7 @@ You: Show the name, phone number and city for all customers from Germany
   Königlich Essen            0555-09876     Brandenburg     
   Lehmanns Marktstand        069-0245984    Frankfurt a.M.  
               
-ChatDB: Okay, I've displayed the results showing the company name, phone number, and city for all customers from Germany.
+DBdex: Okay, I've displayed the results showing the company name, phone number, and city for all customers from Germany.
 You: /export customers_germany.csv
 Results exported to customers_germany.csv
 ```
@@ -55,10 +55,10 @@ Install directly from GitHub, specifying the database drivers you need:
 
 ```
 # Install with all database drivers
-pip install git+https://github.com/Finndersen/chatdb.git[all]
+pip install git+https://github.com/Finndersen/dbdex.git[all]
 
 # Install with specific database drivers (choose one or more)
-pip install git+https://github.com/Finndersen/chatdb.git[postgres, mysql, oracle, mssql]
+pip install git+https://github.com/Finndersen/dbdex.git[postgres, mysql, oracle, mssql]
 ```
 
 ## Usage
@@ -69,7 +69,7 @@ Run the CLI with your model choice and API key:
 
 ```
 # Using OpenAI
-python -m chatdb \
+python -m dbdex \
     --model provider:model_name \
     --api-key your_api_key \
     --db-uri postgresql://user:pass@localhost:5432/dbname
@@ -97,8 +97,8 @@ CLI commands:
 
 ## Logging
 
-ChatDB uses [Logfire](https://github.com/logfire-sh/logfire) for logging (via `pydantic-ai`). 
-Check [here](https://logfire.pydantic.dev/docs/#logfire) for how to authorize and configure your Logfire project to receive logs from ChatDB.
+DBdex uses [Logfire](https://github.com/logfire-sh/logfire) for logging (via `pydantic-ai`). 
+Check [here](https://logfire.pydantic.dev/docs/#logfire) for how to authorize and configure your Logfire project to receive logs from DBdex.
 
 Use the `--debug` CLI option to show logs in the console.
 
@@ -107,8 +107,8 @@ Use the `--debug` CLI option to show logs in the console.
 Clone the repository and install in development mode:
 
 ```
-git clone https://github.com/yourusername/chatdb.git
-cd chatdb
+git clone https://github.com/yourusername/dbdex.git
+cd dbdex
 make install
 ```
 

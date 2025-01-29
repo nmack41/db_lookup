@@ -4,8 +4,8 @@ from pydantic import BaseModel
 from pydantic_ai import ModelRetry, RunContext
 from rich.markdown import Markdown
 
-from chatdb.database import InvalidQueryError
-from chatdb.deps import AgentDeps, CLIAgentDeps
+from dbdex.database import InvalidQueryError
+from dbdex.deps import AgentDeps, CLIAgentDeps
 
 
 class DBQueryResponse(BaseModel):

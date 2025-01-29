@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from rich.console import Console
 
-from chatdb.database import Database
+from dbdex.database import Database
 
 
 @dataclass

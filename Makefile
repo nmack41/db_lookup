@@ -14,11 +14,4 @@ format:
 lint:
 	ruff format . --check
 	ruff check .
-	mypy src
-
-clean:
-	rm -rf build/
-	rm -rf dist/
-	rm -rf *.egg-info/
-	find . -type d -name __pycache__ -exec rm -rf {} +
-	find . -type f -name "*.pyc" -delete 
+	python -m pyright src

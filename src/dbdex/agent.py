@@ -6,9 +6,9 @@ from pydantic_ai.messages import ModelMessage
 from pydantic_ai.models import Model
 from pydantic_ai.result import RunResult
 
-from chatdb.database import Database
-from chatdb.deps import AgentDeps
-from chatdb.tools import execute_sql, show_result_table
+from dbdex.database import Database
+from dbdex.deps import AgentDeps
+from dbdex.tools import execute_sql, show_result_table
 
 DepsT = TypeVar("DepsT", bound=AgentDeps)
 

@@ -40,3 +40,5 @@ ENV/
 
 *.db
 .aider*
+.codebuddy*
+/.logfire/

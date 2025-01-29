@@ -1,5 +1,5 @@
 [project]
-name = "chatdb"
+name = "dbdex"
 version = "0.1.0"
 description = "Use AI to query your database"
 authors = [
@@ -37,7 +37,7 @@ mssql = [
     "pyodbc>=4.0.39",
 ]
 all = [
-    "chatdb[postgres, mysql, oracle, mssql]",
+    "dbdex[postgres, mysql, oracle, mssql]",
 ]
 
 [build-system]

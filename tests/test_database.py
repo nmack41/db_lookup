@@ -4,7 +4,7 @@ from typing import Any, cast
 
 from sqlalchemy.engine import Row
 
-from chatdb.database import QueryResult
+from dbdex.database import QueryResult
 
 
 def make_rows(data: list[dict[str, Any]]) -> list[Row[Any]]:

@@ -1,7 +1,7 @@
 import logfire
 
-from chatdb.cli.args import get_cli_args
-from chatdb.cli.run import run
+from dbdex.cli.args import get_cli_args
+from dbdex.cli.run import run
 
 args = get_cli_args()
 
