@@ -10,11 +10,10 @@ requires-python = ">=3.10"
 dependencies = [
     "sqlalchemy>=2.0.0",
     "pydantic>=2.0.0",
-    "pydantic-ai[logfire]>=0.0.19",  # Installs all model dependencies
+    "pydantic-ai[logfire]>=0.0.19", # Installs all model dependencies
     "logfire[sqlalchemy]>=3.1.0",
+    "gnureadline>=8.2.0",
     "rich>=13.0.0",
-    'gnureadline>=8.2.0; platform_system != "Windows"',
-    'pyreadline3>=3.5.4; platform_system == "Windows"',
 ]
 
 [project.optional-dependencies]
@@ -48,6 +47,7 @@ build-backend = "hatchling.build"
 [tool.ruff]
 line-length = 120
 target-version = "py310"
+
 
 [tool.ruff.lint]
 select = [

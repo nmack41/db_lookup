@@ -1,4 +1,9 @@
-import readline
+try:
+    import readline
+except ImportError:
+    import pyreadline3 as readline
+
+
 from typing import Callable, Sequence
 
 from pydantic_ai.models import KnownModelName

@@ -1,3 +1,5 @@
+Based on dbdex: https://github.com/Finndersen/dbdex to include only local ollama models
+
 # DBdex
 
 Like a Pokédex, but for your database. Uses AI to answer questions about your database data or schema using natural language.
@@ -13,41 +15,41 @@ Like a Pokédex, but for your database. Uses AI to answer questions about your d
 - Efficient handling & display of large result sets (avoids having the LLM generate the data in its response)
 
 TODO:
+
 - Streaming responses
 - Web interface with graph plotting
 
 ## Example
 
 ```md
-Welcome to DBdex CLI! Type '/exit' or '/q' to exit. What would you like to know about your database? 
+Welcome to DBdex CLI! Type '/exit' or '/q' to exit. What would you like to know about your database?
 You: Provide a brief description of each table
 DBdex: Okay, here's a brief description of each table:
 
- • Categories: Stores information about product categories, such as the category name and description.     
+• Categories: Stores information about product categories, such as the category name and description.  
  • Customers: Contains information about customers, such as their company name, contact details, and address.
- • Employees: Stores information about employees, such as their name, job title, and contact information.                                         
- • Order Details: Contains details about individual items within an order, such as the product, quantity, and price.                                               
- • Orders: Contains information about customer orders, including order date, ship details, and associated customer and employee IDs.           
+• Employees: Stores information about employees, such as their name, job title, and contact information.  
+ • Order Details: Contains details about individual items within an order, such as the product, quantity, and price.  
+ • Orders: Contains information about customer orders, including order date, ship details, and associated customer and employee IDs.  
  • Products: Stores information about products, such as the product name, category, supplier, and price.
 
 You: How many customers are there?
 DBdex: There are 93 customers.
 You: Show the name, phone number and city for all customers from Germany
-                                                       
-  CompanyName                Phone          City            
- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 
-  Alfreds Futterkiste        030-0074321    Berlin          
-  Blauer See Delikatessen    0621-08460     Mannheim        
-  Drachenblut Delikatessen   0241-039123    Aachen          
-  Frankenversand             089-0877310    München         
-  Königlich Essen            0555-09876     Brandenburg     
-  Lehmanns Marktstand        069-0245984    Frankfurt a.M.  
-              
+
+CompanyName Phone City  
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Alfreds Futterkiste 030-0074321 Berlin  
+ Blauer See Delikatessen 0621-08460 Mannheim  
+ Drachenblut Delikatessen 0241-039123 Aachen  
+ Frankenversand 089-0877310 München  
+ Königlich Essen 0555-09876 Brandenburg  
+ Lehmanns Marktstand 069-0245984 Frankfurt a.M.
+
 DBdex: Okay, I've displayed the results showing the company name, phone number, and city for all customers from Germany.
 You: /export customers_germany.csv
 Results exported to customers_germany.csv
 ```
-
 
 ## Installation
 
@@ -78,6 +80,7 @@ python -m dbdex \
 The LLM API key can be provided as CLI argument or as environment variable (e.g. `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, etc.).
 
 Supported databases and their connection strings:
+
 - PostgreSQL: `postgresql://user:pass@localhost:5432/dbname`
 - MySQL: `mysql+pymysql://user:pass@localhost:3306/dbname`
 - Oracle: `oracle+cx_oracle://user:pass@localhost:1521/dbname`
@@ -87,6 +90,7 @@ Supported databases and their connection strings:
 Use `--help` to see available model options (newer ones not in the list should also work)
 
 CLI commands:
+
 - `/quit`, `/q` or `/exit` - Exit the CLI
 - `/clear` - Clear conversation history (context provided to the LLM)
 - `/sql <query>` - Execute SQL query directly
@@ -94,10 +98,9 @@ CLI commands:
 - `/result` - Show details & results of the last executed query by the LLM
 - `/export [filename]` - Export last query results to CSV (defaults to query_results.csv)
 
-
 ## Logging
 
-DBdex uses [Logfire](https://github.com/logfire-sh/logfire) for logging (via `pydantic-ai`). 
+DBdex uses [Logfire](https://github.com/logfire-sh/logfire) for logging (via `pydantic-ai`).
 Check [here](https://logfire.pydantic.dev/docs/#logfire) for how to authorize and configure your Logfire project to receive logs from DBdex.
 
 Use the `--debug` CLI option to show logs in the console.
@@ -140,6 +143,7 @@ MIT License
 ## Credits
 
 Built with:
+
 - [pydantic-ai](https://github.com/jxnl/pydantic-ai) - AI model integration with [Logfire](https://github.com/logfire-sh/logfire) logging
 - [SQLAlchemy](https://www.sqlalchemy.org/) - Database connectivity & schema introspection
 - [Rich](https://github.com/Textualize/rich) - Rich text rendering
